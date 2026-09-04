@@ -1,0 +1,9 @@
+Package: com.yellowcat98.privacyinvader
+Name: iInvadePrivacy
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Description: An awesome MobileSubstrate tweak!
+Maintainer: YellowCat98
+Author: YellowCat98
+Section: Tweaks
+Depends: ellekit
