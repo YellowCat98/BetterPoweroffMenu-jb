@@ -1,0 +1,65 @@
+# this is based off https://github.com/Randomblock1/FleetsBGone/blob/master/.github/workflows/build.yml
+
+name: Build Tweak
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Check cache
+        run: |
+          echo upstream_heads=`git ls-remote https://github.com/theos/theos | head -n 1 | cut -f 1`-`git ls-remote https://github.com/theos/sdks | head -n 1 | cut -f 1` >> $GITHUB_ENV
+
+      - name: Use cache
+        id: cache
+        uses: actions/cache@v5
+        with:
+          path: ${{ github.workspace }}/theos
+          key: ${{ runner.os }}-${{ env.upstream_heads }}
+
+      - name: Prepare Theos
+        uses: Randomblock1/theos-action@v1.5
+
+      - name: Prepare & Build package
+        run: |
+          rm -f packages/*
+          chmod 755 layout/DEBIAN
+          chmod 755 layout/DEBIAN/postinst
+          make package FINALPACKAGE=1
+
+      - name: Upload package
+        uses: actions/upload-artifact@v7
+        with:
+          name: Build Output
+          path: ${{ github.workspace }}/packages/*.deb
+
+#  upload:
+#    name: Upload Release
+#    runs-on: ubuntu-latest
+#    needs: ['build']
+
+#    steps:
+#      - name: Download artifacts
+#        uses: actions/download-artifact@v4
+#        with:
+#          path: artifacts
+
+#      - name: Release
+#        uses: softprops/action-gh-release@v2
+#        with:
+#          tag_name: v1.0.0
+#          name: BetterPowerMenu v1.0.0
+#          prerelease: false
+#          body: |
+#            Check CHANGELOG.md for changes.
+
+#          files: artifacts/**/*
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
